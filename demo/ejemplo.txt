@@ -1,0 +1,34 @@
+// prueba_semantico.cpp
+
+int x;               // Warning: x declarada sin inicializar
+int y = 5;
+
+int sumar(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    int resultado = sumar(y, 10);
+    int z;          // Warning: z declarada sin inicializar
+
+    // Uso de variable no inicializada
+    x = z + 2;      // Warning por usar 'z' sin inicializar
+
+    // Asignación con tipo incompatible
+    int w = "hola"; // Error: no se puede asignar string a int
+
+    // Llamada a función con parámetro incorrecto
+    int v = sumar(3);   // Error: 'sumar' espera 2 parámetros, se dio 1
+
+    // Parámetro no usado dentro de la función siguiente
+    int foo(int p, int q) {
+        return p * 2;   // Warning: 'q' nunca usado
+    }
+
+    // Bucle infinito potencial
+    while (1) {
+        // ...
+    }
+
+    return 0;
+}
