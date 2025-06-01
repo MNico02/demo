@@ -2,11 +2,15 @@ package com.compilador;
 
 import com.compilador.semantico.SimbolosListener;
 import com.compilador.semantico.TablaSimbolos;
+import org.antlr.v4.gui.TreeViewer;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
 public class App {
@@ -20,7 +24,7 @@ public class App {
         InputStream is = new FileInputStream(archivo);
         CharStream input = CharStreams.fromStream(is);
 
-        // 1) Crear Lexer y TokenStream
+        // 1) Lexer y TokenStream
         MiniLenguajeLexer lexer = new MiniLenguajeLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         tokens.fill();
@@ -36,25 +40,26 @@ public class App {
             }
         }
 
-        // 3) Crear Parser y generar AST
+        // 3) Parser y generación del AST
         MiniLenguajeParser parser = new MiniLenguajeParser(tokens);
         ParseTree tree = parser.programa();
 
-        // (Opcional) Visualizar el árbol en Swing:
-        //   List<String> reglas = parser.getRuleNames();
-        //   TreeViewer tv = new TreeViewer(reglas, tree);
-        //   JFrame frame = new JFrame("Árbol de Sintaxis");
-        //   frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //   frame.add(new JScrollPane(tv));
-        //   frame.setSize(800, 600);
-        //   frame.setVisible(true);
+        // ──────── SECCIÓN PARA VISUALIZAR EL ÁRBOL ────────
+        List<String> reglaNombres = Arrays.asList(parser.getRuleNames());
+        TreeViewer tv = new TreeViewer(reglaNombres, tree);
+        JFrame frame = new JFrame("Árbol de Sintaxis");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(new JScrollPane(tv));
+        frame.setSize(800, 600);
+        frame.setVisible(true);
+        // ──────────────────────────────────────────────────
 
-        // 4) Invocar el listener semántico
+        // 4) Recorrer AST con el listener semántico
         SimbolosListener listener = new SimbolosListener();
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(listener, tree);
 
-        // 5) Obtener y mostrar errores y warnings semánticos
+        // 5) Obtener errores y warnings semánticos
         List<String> errores  = listener.getErrores();
         List<String> warnings = listener.getWarnings();
 
@@ -67,7 +72,7 @@ public class App {
             warnings.forEach(System.out::println);
         }
 
-        // 6) Si no hay errores, mostrar la tabla de símbolos
+        // 6) Si no hay errores, mostrar tabla de símbolos
         if (errores.isEmpty()) {
             TablaSimbolos tabla = listener.getTablaSimbolos();
             tabla.imprimir();
